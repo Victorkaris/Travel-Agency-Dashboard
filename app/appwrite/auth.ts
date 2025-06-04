@@ -80,44 +80,33 @@ export const getGooglePicture = async (accessToken: string) => {
 }
 
 export const storeUserData = async () => {
-    try{
-        const user = await account.get();
+  try {
+    const user = await account.get();
+    if (!user) throw new Error("User not found");
 
-        if (!user) return null;
+    const { providerAccessToken } = (await account.getSession("current")) || {};
+    const profilePicture = providerAccessToken
+      ? await getGooglePicture(providerAccessToken)
+      : null;
 
-        // check is user already exists in the database
-        const { documents } = await database.listDocuments(
-            appwriteConfig.databaseId,
-            appwriteConfig.userCollectionId,
-            [
-                Query.equal('accountId', user.$id),
-            ]
-        );
+    const createdUser = await database.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      ID.unique(),
+      {
+        accountId: user.$id,
+        email: user.email,
+        name: user.name,
+        imageUrl: profilePicture,
+        joinedAt: new Date().toISOString(),
+      }
+    );
 
-        if (documents.length > 0)  return documents[0];
-
-        // Get profile photo from Google
-        const profilePhoto = await getGooglePicture();
-
-        // Create a new user document in the database
-        const newUser = await database.createDocument(
-            appwriteConfig.databaseId,
-            appwriteConfig.userCollectionId,
-            ID.unique(),
-            {
-                name: user.name,
-                email: user.email,
-                imageUrl: profilePhoto || ' ', // Fallback image
-                joinedAt: new Date().toISOString(),
-                accountId: user.$id,
-            }
-        );
-        return newUser;
-
-    } catch (e) {
-        console.log('storeUserData', e);
-    }
-}
+    if (!createdUser.$id) redirect("/sign-in");
+  } catch (error) {
+    console.error("Error storing user data:", error);
+  }
+};
 
 export const getExistingUser = async (id: string) => {
   try {
