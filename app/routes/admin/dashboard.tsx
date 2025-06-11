@@ -8,7 +8,7 @@ const { totalUsers, usersJoined, totalTrips, tripsCreated, userRole } = dashboar
 
 // export async function clientLoader () {
 //     return await getUser();
-// }
+// } ;oiuytre
 
 
 export const clientLoader = async () => await getUser();
