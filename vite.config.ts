@@ -4,21 +4,23 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-const sentryConfig: SentryReactRouterBuildOptions = {
-  org: "j-mastery",
-  project: "travel-agency",
-  // An auth token is required for uploading source maps.
-  authToken: import.meta.env.VITE_SENTRY_AUTH_TOKEN,
-  // ...
-};
-
-
 export default defineConfig(config => {
+  const sentryConfig: SentryReactRouterBuildOptions = {
+    org: "j-mastery",
+    project: "travel-agency",
+    authToken: import.meta.env.VITE_SENTRY_AUTH_TOKEN, // Now safe
+    // You can add other options as needed
+  };
+
   return {
-  plugins: [tailwindcss(),  tsconfigPaths(), reactRouter(),sentryReactRouter(sentryConfig, config)],
-  sentryConfig,
-   ssr: {
-    noExternal: [/@syncfusion/] 
-  },
+    plugins: [
+      tailwindcss(),
+      tsconfigPaths(),
+      reactRouter(),
+      sentryReactRouter(sentryConfig, config),
+    ],
+    ssr: {
+      noExternal: [/@syncfusion/],
+    },
   };
 });
