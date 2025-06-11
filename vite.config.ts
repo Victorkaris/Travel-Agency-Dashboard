@@ -5,11 +5,16 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(config => {
+  const sentryAuthToken = process.env.VITE_SENTRY_AUTH_TOKEN;
+
+  if (!sentryAuthToken) {
+    console.warn("⚠️ VITE_SENTRY_AUTH_TOKEN is not defined — Sentry source maps will not be uploaded.");
+  }
+
   const sentryConfig: SentryReactRouterBuildOptions = {
     org: "j-mastery",
     project: "travel-agency",
-    authToken: import.meta.env.VITE_SENTRY_AUTH_TOKEN, // Now safe
-    // You can add other options as needed
+    authToken: sentryAuthToken, // Use process.env here
   };
 
   return {
