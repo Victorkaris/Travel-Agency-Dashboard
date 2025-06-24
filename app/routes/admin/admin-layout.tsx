@@ -3,6 +3,7 @@ import { SidebarComponent } from "@syncfusion/ej2-react-navigations";
 import { NavItems, MobileSidebar } from "components";
 import { account } from "~/appwrite/client";
 import { getExistingUser, storeUserData } from "~/appwrite/auth";
+import { useEffect } from "react";
 
 export async function clientLoader() {
     try{
@@ -25,6 +26,21 @@ export async function clientLoader() {
 }
 
 const AdminLayout = () => {
+  useEffect(() => {
+    const ensureUserStored = async () => {
+      try {
+        const user = await account.get();
+        const exists = await getExistingUser(user.$id);
+        if (!exists) {
+          await storeUserData(); // ✅ store the user immediately if not already
+        }
+      } catch (error) {
+        console.error("Failed to ensure user data is stored:", error);
+      }
+    };
+
+    ensureUserStored();
+  }, []);
     
   return (
     <div className="admin-layout">
